@@ -43,7 +43,7 @@ class PathingGrid extends React.Component {
 
 	var count = 0;
 	
-	this.timerID = setInterval(
+	this.dijkstraInterval = setInterval(
 	    () => {
 		
 		
@@ -80,7 +80,7 @@ class PathingGrid extends React.Component {
     }
 
     componentDidMount() {
-	this.timerID = null;
+	this.dijkstraInterval = null;
 	let a = this.state.tiles.slice();
 	//set weights of all neighboring tiles
 	for (let i = 0; i < this.state.numTiles; i++) {
@@ -111,8 +111,8 @@ class PathingGrid extends React.Component {
     }
 
     stop() {
-	clearInterval(this.timerID);
-	this.timerID = null;
+	clearInterval(this.dijkstraInterval);
+	this.dijkstraInterval = null;
 	console.log("done");
     }
     
