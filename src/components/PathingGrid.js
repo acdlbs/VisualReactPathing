@@ -17,10 +17,25 @@ class PathingGrid extends React.Component {
 	};
     }
 
+    minNode(distances, visited) {
+	let min = Infinity;
+	let minIndex = -1;
+
+	for (let i = 0; i < this.state.numTiles; i++) {
+	    if (distances[i] <= min && visited[i] === false) {
+		min = distances[i];
+		minIndex = i;
+	    }
+	}
+	
+	return minIndex;
+    }
+    
     dijkstra() {
 	let pathingTiles = this.state.tiles.slice();
-	let src = 0;
-	let dest = 0;
+	let src = -1;
+	let dest = -1;
+	let parentLoop = false;
 	for (let i = 0; i < this.state.numTiles; i++) {
 	    if (pathingTiles[i].start === true) {
 		src = i;
@@ -29,50 +44,61 @@ class PathingGrid extends React.Component {
 		dest = i;
 	    }
 	}
-	let dist = [];
-	let visited = [];
-	let parent = [];
+	
+	let distances = {};
+	let visited = {};
+	let parents = {};
 
-	for(let i = 0; i < this.state.numTiles; i++) {
-	    parent[0] = -1;
-	    dist[i] = 10000000;
+	for (let i = 0; i < this.state.numTiles; i++) {
+	    distances[i] = Infinity;
 	    visited[i] = false;
 	}
 
-	dist[src] = 0;
 
-	var count = 0;
+	parents[src] = null;
+	distances[src] = 0;
+
+	let counter = 0;
+
+	let parent;
 	
 	this.dijkstraInterval = setInterval(
 	    () => {
-		
-		
-		let min_index;
-		
 
-		let u;
-		let min = 10000000;
-		for(let v = 0; v < this.state.numTiles; v++) {
-		    if (visited[v] === false && dist[v] <= min) {
-			min = dist[v];
-			min_index = v;
-		    }
-
-		}
-
-		visited[min_index] = true;
-		this.changeColor(min_index, "blue");
-		
-
-		for(let i = 0; i < this.state.numTiles; i++) {
-		    if (!visited[i] && this.state.tiles[min_index].weight[i] && dist[min_index] + this.state.tiles[min_index].weight[i] < dist[i]){
-			parent[i] = min_index;
-			dist[i] = dist[min_index] + this.state.tiles[min_index].weight[i];
-		    }
+		if (parentLoop) {
+		    this.changeColor(parents[parent], "red");
+		    parent = parents[parent];
+		    if (parent === null) this.stop();
+		} else {
 		    
-		} 
-		count++;
-		if (count >= this.state.numTiles) this.stop()
+		    let currentMinNode = this.minNode(distances, visited);
+		    
+		    visited[currentMinNode] = true;
+
+		    if (currentMinNode !== src && currentMinNode !== dest){
+			this.changeColor(currentMinNode, "blue");
+		    }
+
+		    if (currentMinNode === dest) {
+			console.log(parents);
+			counter = 0;
+			parent = dest;
+			parentLoop = true;
+		    }
+
+		    for (let i = 0; i < this.state.numTiles; i++) {
+			if (!visited[i] && pathingTiles[currentMinNode].weight[i] !== 0 && distances[currentMinNode] !== Infinity && distances[currentMinNode] + pathingTiles[currentMinNode].weight[i] < distances[i]) {
+			    distances[i] = distances[currentMinNode] + pathingTiles[currentMinNode].weight[i];
+			    parents[i] = currentMinNode;
+			}
+		    } 
+		    
+		    if (counter < this.state.numTiles){
+			counter++;
+		    } else {
+			this.stop();
+		    }
+		}
 	    },
 	    100
 	);
