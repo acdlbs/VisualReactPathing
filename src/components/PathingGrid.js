@@ -22,7 +22,7 @@ class PathingGrid extends React.Component {
 	let minIndex = -1;
 
 	for (let i = 0; i < this.state.numTiles; i++) {
-	    if (distances[i] <= min && visited[i] === false) {
+	    if (distances[i] <= min && visited[i] === false && this.state.tiles[i].wall == false) {
 		min = distances[i];
 		minIndex = i;
 	    }
@@ -32,6 +32,7 @@ class PathingGrid extends React.Component {
     }
     
     dijkstra() {
+	let found = false;
 	let pathingTiles = this.state.tiles.slice();
 	let src = -1;
 	let dest = -1;
@@ -81,6 +82,7 @@ class PathingGrid extends React.Component {
 
 		    if (currentMinNode === dest) {
 			console.log(parents);
+			found = true;
 			counter = 0;
 			parent = dest;
 			parentLoop = true;
@@ -93,14 +95,14 @@ class PathingGrid extends React.Component {
 			}
 		    } 
 		    
-		    if (counter < this.state.numTiles){
+		    if (found === false/* counter < this.state.numTiles */){
 			counter++;
 		    } else {
-			this.stop();
+			//this.stop();
 		    }
 		}
 	    },
-	    100
+	    10
 	);
 
     }
@@ -112,10 +114,12 @@ class PathingGrid extends React.Component {
 	for (let i = 0; i < this.state.numTiles; i++) {
 	    let w = (new Array(this.state.numTiles).fill(0));
 	    if (i+1 in w) {
-		w[i+1] = 1;
+		if (i%10 === 9) w[i+1] = 0;
+		else w[i+1] = 1;
 	    }
 	    if (i-1 in w) {
-		w[i-1] = 1;
+		if (i%10 === 0) w[i-1] = 0;
+		else w[i-1] = 1;
 	    }
 	    if (i+this.state.width in w) {
 		w[i+ this.state.width] = 1;
@@ -123,7 +127,7 @@ class PathingGrid extends React.Component {
 	    if (i-this.state.width in w) {
 		w[i- this.state.width] = 1;
 	    }
-	    a[i] = {id: i, color: "white", weight: w, start: false, end: false};
+	    a[i] = {id: i, color: "white", weight: w, start: false, end: false, wall: false};
 	}
 	this.setState((state, props) => ({tiles: a}));
     }
@@ -199,8 +203,21 @@ class PathingGrid extends React.Component {
 	    
 	    this.toggleEnd();
 	} else {
-	    if (this.state.tiles[index].color !== "white")this.changeColor(index, "white");
-	    else this.changeColor(index, "blue");
+	    if (this.state.tiles[index].color !== "white") {
+		if (this.state.tiles[index].wall == true){
+		    let tmps = [...this.state.tiles];
+		    let tmp = {...tmps[index], wall: false, color: "white"};
+		    tmps[index] = tmp;
+		    this.setState({tiles: tmps});
+		}		
+	    }
+	    else {
+		let tmps = [...this.state.tiles];
+		let tmp = {...tmps[index], wall: true, color: "black"};
+		tmps[index] = tmp;
+		this.setState({tiles: tmps});
+	    }
+	    
 
 	}
     }
