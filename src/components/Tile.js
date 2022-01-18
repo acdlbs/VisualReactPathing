@@ -1,5 +1,6 @@
 import * as React from "react";
-import Box from "@mui/material/Box"; 
+import Box from "@mui/material/Box";
+import './Tile.css'
 
 class Tile extends React.Component {
     constructor(props) {
@@ -19,26 +20,41 @@ class Tile extends React.Component {
 	       this.setState({toggled: true});
 	       }  */
 	}
+	let style = {
+	    width: this.state.size,
+	    height: this.state.size,
+	    backgroundColor: "#FF4141",
+	    "&:hover": {
+		backgroundColor: "#FF7676",
+		opacity: [0.9, 0.8, 0.7]
+	    }
+	};
 	let box;
-	switch (this.props.color) {
-	    case "red":
-		box = (<button onClick={()=>{c()}}  style={{outline: 'none', border: "0px", padding: "0px"}}><Box sx={{ width: this.state.size, height: this.state.size, backgroundColor: "#FF4141", "&:hover": { backgroundColor: "#FF7676", opacity: [0.9, 0.8, 0.7], } }}></Box></button>);
+	switch (this.props.type) {
+	    case "finish":
+		box = (<Box className='finish'></Box>);
 		break;
-	    case "white":
-		box = (<button onClick={()=>{c()}} style={{outline: 'none', border: "0px", padding: "0px"}}><Box sx={{ width: this.state.size, height: this.state.size, backgroundColor: "#E7E7E7", "&:hover": { backgroundColor: "#FAF9F9", opacity: [0.9, 0.8, 0.7], } }}></Box></button>);
+	    case "path":
+		box = (<Box className='path'></Box>);
 		break;
-	    case "green":
-		box = (<button onClick={()=>{c()}}  style={{outline: 'none', border: "0px", padding: "0px"}}><Box sx={{ width: this.state.size, height: this.state.size, backgroundColor: "#15C241", "&:hover": { backgroundColor: "#77C38A", opacity: [0.9, 0.8, 0.7], } }}></Box></button>);
+	    case "unvisited":
+		box = (<Box className='unvisited'></Box>);
 		break;
-	    case "blue":
-		box = (<button onClick={()=>{c()}}  style={{outline: 'none', border: "0px", padding: "0px"}}><Box sx={{ width: this.state.size, height: this.state.size, backgroundColor: "#4253D1", "&:hover": { backgroundColor: "#808AD3", opacity: [0.9, 0.8, 0.7], } }}></Box></button>);
+	    case "start":
+		box = (<Box className='start'></Box>);
+		break;
+	    case "visiting":
+		box = (<Box className='node-visited'></Box>);
+		break;
+	    case "wall":
+		box = (<Box className='wall'></Box>);
 		break;
 	}
 	
 	return (
-	    <div>
+	    <button onClick={this.props.onClick} style={{outline: 'none', border: "0px", padding: "0px"}}>
 	    { box }
-	    </div>
+	    </button>
 	);
     }
 }

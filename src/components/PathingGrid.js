@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import Tile from "./Tile.js"
 import Box from "@mui/material/Box";
@@ -27,7 +26,6 @@ class PathingGrid extends React.Component {
 		minIndex = i;
 	    }
 	}
-	
 	return minIndex;
     }
     
@@ -67,18 +65,16 @@ class PathingGrid extends React.Component {
 	    () => {
 
 		if (parentLoop) {
-		    this.changeColor(parents[parent], "red");
+		    if (parents[parent] !== src) this.changeType(parents[parent], "path");
 		    parent = parents[parent];
-		    if (parent === null) this.stop();
+		    if (parents[parent] === null) this.stop();
 		} else {
 		    
 		    let currentMinNode = this.minNode(distances, visited);
+		    //console.log(currentMinNode);
 		    
 		    visited[currentMinNode] = true;
 
-		    if (currentMinNode !== src && currentMinNode !== dest){
-			this.changeColor(currentMinNode, "blue");
-		    }
 
 		    if (currentMinNode === dest) {
 			console.log(parents);
@@ -90,6 +86,7 @@ class PathingGrid extends React.Component {
 
 		    for (let i = 0; i < this.state.numTiles; i++) {
 			if (!visited[i] && pathingTiles[currentMinNode].weight[i] !== 0 && distances[currentMinNode] !== Infinity && distances[currentMinNode] + pathingTiles[currentMinNode].weight[i] < distances[i]) {
+			    if (this.state.tiles[i].type !== "wall" && i !== src && i !== dest) this.changeType(i, "visiting");
 			    distances[i] = distances[currentMinNode] + pathingTiles[currentMinNode].weight[i];
 			    parents[i] = currentMinNode;
 			}
@@ -107,33 +104,34 @@ class PathingGrid extends React.Component {
 
     }
 
-    componentDidMount() {
+    clear() {
+	this.stop();
 	this.dijkstraInterval = null;
 	let a = this.state.tiles.slice();
 	//set weights of all neighboring tiles
 	for (let i = 0; i < this.state.numTiles; i++) {
 	    let w = (new Array(this.state.numTiles).fill(0));
 	    if (i+1 in w) {
-		if (i%10 === 9) w[i+1] = 0;
+		if (i % this.state.width === this.state.width - 1) w[i+1] = 0;
 		else w[i+1] = 1;
 	    }
 	    if (i-1 in w) {
-		if (i%10 === 0) w[i-1] = 0;
+		if (i % this.state.width === 0) w[i-1] = 0;
 		else w[i-1] = 1;
 	    }
-	    if (i+this.state.width in w) {
-		w[i+ this.state.width] = 1;
+	    if (i + this.state.width in w) {
+		w[i + this.state.width] = 1;
 	    }
-	    if (i-this.state.width in w) {
-		w[i- this.state.width] = 1;
+	    if (i - this.state.width in w) {
+		w[i - this.state.width] = 1;
 	    }
-	    a[i] = {id: i, color: "white", weight: w, start: false, end: false, wall: false};
+	    a[i] = {id: i, type: "unvisited", weight: w, start: false, end: false, wall: false};
 	}
 	this.setState((state, props) => ({tiles: a}));
     }
 
-    componentWillUnmount() {
-
+    componentDidMount() {
+	this.clear();
     }
 
     path() {
@@ -146,14 +144,14 @@ class PathingGrid extends React.Component {
 	console.log("done");
     }
     
-    changeColor(index, color) {
+    changeType(index, type) {
 	if (index > this.state.numTiles) {
 	    console.error("index greter than size of tiles");
 	    this.stop();
 	    return null;
 	}
 	let tmps = [...this.state.tiles];
-	let tmp = {...tmps[index], color: color};
+	let tmp = {...tmps[index], type: type};
 	tmps[index] = tmp;
 	this.setState({tiles: tmps});
 
@@ -168,6 +166,7 @@ class PathingGrid extends React.Component {
     }
 
     clickTile(index) {
+	console.log("foo");
 	if (this.state.startToggle === true) {
 	    let searchingSet = this.state.tiles.slice();
 	    let oldStart;
@@ -177,8 +176,8 @@ class PathingGrid extends React.Component {
 		}
 	    }
 	    let toChangeTiles = [...this.state.tiles];
-	    let toChangeTile = {...toChangeTiles[index], start: true, color: "green"};
-	    let oldStartItem = {...toChangeTiles[oldStart], start: false, color: "white"};
+	    let toChangeTile = {...toChangeTiles[index], start: true, type: "start"};
+	    let oldStartItem = {...toChangeTiles[oldStart], start: false, type: "unvisited"};
 	    console.log(oldStartItem);
 	    toChangeTiles[oldStart] = oldStartItem;
 	    toChangeTiles[index] = toChangeTile;
@@ -194,8 +193,8 @@ class PathingGrid extends React.Component {
 		}
 	    }
 	    let toChangeTiles = [...this.state.tiles];
-	    let toChangeTile = {...toChangeTiles[index], end: true, color: "red"};
-	    let oldEndItem = {...toChangeTiles[oldEnd], end: false, color: "white"};
+	    let toChangeTile = {...toChangeTiles[index], end: true, type: "finish"};
+	    let oldEndItem = {...toChangeTiles[oldEnd], end: false, type: "unvisited"};
 	    console.log(oldEndItem);
 	    toChangeTiles[oldEnd] = oldEndItem;
 	    toChangeTiles[index] = toChangeTile;
@@ -203,17 +202,17 @@ class PathingGrid extends React.Component {
 	    
 	    this.toggleEnd();
 	} else {
-	    if (this.state.tiles[index].color !== "white") {
+	    if (this.state.tiles[index].type !== "unvisited") {
 		if (this.state.tiles[index].wall == true){
 		    let tmps = [...this.state.tiles];
-		    let tmp = {...tmps[index], wall: false, color: "white"};
+		    let tmp = {...tmps[index], wall: false, type: "unvisited"};
 		    tmps[index] = tmp;
 		    this.setState({tiles: tmps});
 		}		
 	    }
 	    else {
 		let tmps = [...this.state.tiles];
-		let tmp = {...tmps[index], wall: true, color: "black"};
+		let tmp = {...tmps[index], wall: true, type: "wall"};
 		tmps[index] = tmp;
 		this.setState({tiles: tmps});
 	    }
@@ -226,13 +225,14 @@ class PathingGrid extends React.Component {
     render() {
 	return (
 	    <div>
-		<button onClick={() => {this.toggleStart()}}>startFlag</button>
-		<button onClick={() => {this.toggleEnd();}}>endFlag</button>
-		<button onClick={() => {this.path();}}>path</button>
-		<button onClick={() => {console.log(this.state.tiles);}}> foo </button>
-		<Box sx={{ display: 'grid', gridGap: "1px", gridTemplateColumns: 'repeat(' + this.state.width + ', 1fr)', gridTemplateRows: 'repeat(' + this.state.width + ', 1fr)', width: "50vw", height: "50vh" }}>
-		    {this.state.tiles.map((element, index, array) => {return <button key={index} onClick={()=>{this.clickTile(index)}}  style={{outline: 'none', border: "0px", padding: "0px"}}><Tile onClick={()=>{this.clickTile(index)}}  key={element} color={this.state.tiles.at(index).color} /></button>})}
-		</Box>
+	    <button onClick={() => {this.toggleStart()}}>startFlag</button>
+	    <button onClick={() => {this.toggleEnd();}}>endFlag</button>
+	    <button onClick={() => {this.path();}}>path</button>
+	    <button onClick={() => {console.log(this.state.tiles);}}> foo </button>
+	    <button onClick={() => {this.clear()}}> clear </button>
+	    <Box sx={{ display: 'grid', justifyContent: 'center', gridGap: "0px", gridTemplateColumns: 'repeat(' + this.state.width + ', 8vh)', gridTemplateRows: 'repeat(' + this.state.width + ', 8vh)' }}>
+	    {this.state.tiles.map((element, index, array) => {return <Tile onClick={()=>{this.clickTile(index)}} key={index} type={this.state.tiles.at(index).type} />})}
+	    </Box>
 	    </div>
 	);
     }
