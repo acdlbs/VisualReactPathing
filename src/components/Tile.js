@@ -11,8 +11,14 @@ class Tile extends React.Component {
 	};
     }
 
+    shouldComponentUpdate(nextProps, nextState) {
+	if (nextProps.type === this.props.type) return false;
+	return true;
+    }
+
     
     render() {
+	console.log("render Tile");
 	var c = () => {
 	    /* if (this.state.toggled) {
 	       this.setState({toggled: false});

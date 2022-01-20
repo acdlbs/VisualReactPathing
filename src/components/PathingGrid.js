@@ -2,15 +2,16 @@ import * as React from "react";
 import Tile from "./Tile.js"
 import Box from "@mui/material/Box";
 
+
 class PathingGrid extends React.Component {
     
     constructor(props) {
 	super(props);
 	this.state = {
-	    numTiles: 100,
-	    width: 10,
+	    numTiles: 2000,
+	    width: 45,
+	    height: 45,
 	    tiles: [],
-	    iter: 0,
 	    startToggle: false,
 	    endToggle: false
 	};
@@ -21,7 +22,7 @@ class PathingGrid extends React.Component {
 	let minIndex = -1;
 
 	for (let i = 0; i < this.state.numTiles; i++) {
-	    if (distances[i] <= min && visited[i] === false && this.state.tiles[i].wall == false) {
+	    if (distances[i] <= min && visited[i] === false && this.state.tiles[i].wall === false) {
 		min = distances[i];
 		minIndex = i;
 	    }
@@ -60,6 +61,8 @@ class PathingGrid extends React.Component {
 	let counter = 0;
 
 	let parent;
+
+	let visitingStack = [];
 	
 	this.dijkstraInterval = setInterval(
 	    () => {
@@ -69,15 +72,27 @@ class PathingGrid extends React.Component {
 		    parent = parents[parent];
 		    if (parents[parent] === null) this.stop();
 		} else {
+		    if (visitingStack.length >= 1) {
+			let tmps = [...this.state.tiles];
+			visitingStack.forEach((element) => {
+			    let tmp = {...tmps[element], type: "visiting"};
+			    tmps[element] = tmp;
+			});
+			this.setState({tiles: tmps});
+			visitingStack = [];
+		    }
 		    
+
 		    let currentMinNode = this.minNode(distances, visited);
-		    //console.log(currentMinNode);
+		    if (currentMinNode === -1) {
+			this.stop();
+			return;
+		    }
 		    
 		    visited[currentMinNode] = true;
 
 
 		    if (currentMinNode === dest) {
-			console.log(parents);
 			found = true;
 			counter = 0;
 			parent = dest;
@@ -86,7 +101,10 @@ class PathingGrid extends React.Component {
 
 		    for (let i = 0; i < this.state.numTiles; i++) {
 			if (!visited[i] && pathingTiles[currentMinNode].weight[i] !== 0 && distances[currentMinNode] !== Infinity && distances[currentMinNode] + pathingTiles[currentMinNode].weight[i] < distances[i]) {
-			    if (this.state.tiles[i].type !== "wall" && i !== src && i !== dest) this.changeType(i, "visiting");
+			    if (this.state.tiles[i].type !== "wall" && i !== src && i !== dest) {
+				visitingStack.push(i);
+
+			    }//this.changeType(i, "visiting");
 			    distances[i] = distances[currentMinNode] + pathingTiles[currentMinNode].weight[i];
 			    parents[i] = currentMinNode;
 			}
@@ -99,7 +117,7 @@ class PathingGrid extends React.Component {
 		    }
 		}
 	    },
-	    10
+	    1
 	);
 
     }
@@ -166,7 +184,6 @@ class PathingGrid extends React.Component {
     }
 
     clickTile(index) {
-	console.log("foo");
 	if (this.state.startToggle === true) {
 	    let searchingSet = this.state.tiles.slice();
 	    let oldStart;
@@ -203,7 +220,7 @@ class PathingGrid extends React.Component {
 	    this.toggleEnd();
 	} else {
 	    if (this.state.tiles[index].type !== "unvisited") {
-		if (this.state.tiles[index].wall == true){
+		if (this.state.tiles[index].wall === true){
 		    let tmps = [...this.state.tiles];
 		    let tmp = {...tmps[index], wall: false, type: "unvisited"};
 		    tmps[index] = tmp;
@@ -220,7 +237,7 @@ class PathingGrid extends React.Component {
 
 	}
     }
-    //`${ this.state.percentage }%`
+    //`${ this.state.percentage }%` 	    <Box sx={{ display: 'grid', justifyContent: 'center', gridGap: "0px", gridTemplateColumns: 'repeat(' + this.state.width + ', 3vh)', gridTemplateRows: 'repeat(' + this.state.width + ', 3vh)' }}>
 
     render() {
 	return (
@@ -230,8 +247,9 @@ class PathingGrid extends React.Component {
 	    <button onClick={() => {this.path();}}>path</button>
 	    <button onClick={() => {console.log(this.state.tiles);}}> foo </button>
 	    <button onClick={() => {this.clear()}}> clear </button>
-	    <Box sx={{ display: 'grid', justifyContent: 'center', gridGap: "0px", gridTemplateColumns: 'repeat(' + this.state.width + ', 8vh)', gridTemplateRows: 'repeat(' + this.state.width + ', 8vh)' }}>
-	    {this.state.tiles.map((element, index, array) => {return <Tile onClick={()=>{this.clickTile(index)}} key={index} type={this.state.tiles.at(index).type} />})}
+	    {console.log("render")}
+	    <Box sx={{ display: 'grid', justifyContent: 'center', gridGap: "0px", gridTemplateColumns: 'repeat(' + this.state.width + ', 3vh)', gridTemplateRows: 'repeat(' + this.state.height + ', 3vh)' }}>
+	    {this.state.tiles.map((element, index, array) => {return <Tile onClick={()=>{this.clickTile(index)}} key={this.state.tiles.at(index).id} type={this.state.tiles.at(index).type} />})}
 	    </Box>
 	    </div>
 	);
