@@ -3,38 +3,20 @@ import Box from "@mui/material/Box";
 import './Tile.css'
 
 class Tile extends React.Component {
-    constructor(props) {
-	super(props);
-	this.state = {
-	    size: 100,
-	    toggled: true
-	};
-    }
 
+    //as to not render all tiles everytime one is updated
     shouldComponentUpdate(nextProps, nextState) {
-	if (nextProps.type === this.props.type) return false;
-	return true;
+	if (nextProps.type !== this.props.type) return true;
+	//if (nextProps.id > this.props.numTiles) return true;
+	/* console.log(nextProps.type);
+	   console.log(this.props.type); */
+	return false;
     }
 
     
     render() {
 	console.log("render Tile");
-	var c = () => {
-	    /* if (this.state.toggled) {
-	       this.setState({toggled: false});
-	       } else if (!this.state.toggled) {
-	       this.setState({toggled: true});
-	       }  */
-	}
-	let style = {
-	    width: this.state.size,
-	    height: this.state.size,
-	    backgroundColor: "#FF4141",
-	    "&:hover": {
-		backgroundColor: "#FF7676",
-		opacity: [0.9, 0.8, 0.7]
-	    }
-	};
+	//swap type of tyle for rendering
 	let box;
 	switch (this.props.type) {
 	    case "finish":
