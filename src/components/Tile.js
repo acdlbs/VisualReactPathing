@@ -15,7 +15,6 @@ class Tile extends React.Component {
 
     
     render() {
-	console.log("render Tile");
 	//swap type of tyle for rendering
 	let box;
 	switch (this.props.type) {
@@ -40,7 +39,7 @@ class Tile extends React.Component {
 	}
 	
 	return (
-	    <button onClick={this.props.onClick} style={{outline: 'none', border: "0px", padding: "0px"}}>
+	    <button onMouseOver={this.props.drag} onMouseDown={this.props.click} style={{outline: 'none', border: "0px", padding: "0px"}}>
 	    { box }
 	    </button>
 	);

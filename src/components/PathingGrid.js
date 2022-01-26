@@ -13,7 +13,8 @@ class PathingGrid extends React.Component {
 	    height: 45,
 	    tiles: [],
 	    startToggle: false,
-	    endToggle: false
+	    endToggle: false,
+	    mouseDown: false
 	};
     }
 
@@ -233,11 +234,8 @@ class PathingGrid extends React.Component {
 		tmps[index] = tmp;
 		this.setState({tiles: tmps});
 	    }
-	    
-
 	}
     }
-    //`${ this.state.percentage }%` 	    <Box sx={{ display: 'grid', justifyContent: 'center', gridGap: "0px", gridTemplateColumns: 'repeat(' + this.state.width + ', 3vh)', gridTemplateRows: 'repeat(' + this.state.width + ', 3vh)' }}>
 
     render() {
 	return (
@@ -247,9 +245,8 @@ class PathingGrid extends React.Component {
 	    <button onClick={() => {this.path();}}>path</button>
 	    <button onClick={() => {console.log(this.state.tiles);}}> foo </button>
 	    <button onClick={() => {this.clear()}}> clear </button>
-	    {console.log("render")}
-	    <Box sx={{ display: 'grid', justifyContent: 'center', gridGap: "0px", gridTemplateColumns: 'repeat(' + this.state.width + ', 3vh)', gridTemplateRows: 'repeat(' + this.state.height + ', 3vh)' }}>
-	    {this.state.tiles.map((element, index, array) => {return <Tile onClick={()=>{this.clickTile(index)}} key={this.state.tiles.at(index).id} type={this.state.tiles.at(index).type} />})}
+	    <Box onMouseDown={()=>{this.setState({mouseDown: true})}} onMouseUp={()=>{this.setState({mouseDown: false})}} sx={{ display: 'grid', justifyContent: 'center', gridGap: "0px", gridTemplateColumns: 'repeat(' + this.state.width + ', 3vh)', gridTemplateRows: 'repeat(' + this.state.height + ', 3vh)' }}>
+	    {this.state.tiles.map((element, index, array) => {return <Tile click={()=>{this.clickTile(index)}} drag={()=>{if (this.state.mouseDown === true) this.clickTile(index)}} key={this.state.tiles.at(index).id} type={this.state.tiles.at(index).type} />})}
 	    </Box>
 	    </div>
 	);
