@@ -39,7 +39,7 @@ class Tile extends React.Component {
 	}
 	
 	return (
-	    <button onMouseOver={this.props.drag} onMouseDown={this.props.click} style={{outline: 'none', border: "0px", padding: "0px"}}>
+	    <button onTouchStart={this.props.click} onTouchMove={this.props.drag} onMouseOver={this.props.drag} onMouseDown={this.props.click} style={{outline: 'none', border: "0px", padding: "0px"}}>
 	    { box }
 	    </button>
 	);

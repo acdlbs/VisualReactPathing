@@ -4,13 +4,14 @@ import Box from "@mui/material/Box";
 
 
 class PathingGrid extends React.Component {
-    
+
+    //props
     constructor(props) {
 	super(props);
 	this.state = {
-	    numTiles: 2000,
-	    width: 45,
-	    height: 45,
+	    numTiles: 100,
+	    width: 10,
+	    height: 10,
 	    tiles: [],
 	    startToggle: false,
 	    endToggle: false,
@@ -18,6 +19,8 @@ class PathingGrid extends React.Component {
 	};
     }
 
+
+    //gets min weighted node to visit next
     minNode(distances, visited) {
 	let min = Infinity;
 	let minIndex = -1;
@@ -30,7 +33,8 @@ class PathingGrid extends React.Component {
 	}
 	return minIndex;
     }
-    
+
+    // dijkstra's algorithm
     dijkstra() {
 	let found = false;
 	let pathingTiles = this.state.tiles.slice();
@@ -123,9 +127,11 @@ class PathingGrid extends React.Component {
 
     }
 
+
+    //clears the screen
     clear() {
 	this.stop();
-	this.dijkstraInterval = null;
+	if (this.dijkstraInterval != null) this.dijkstraInterval = null;
 	let a = this.state.tiles.slice();
 	//set weights of all neighboring tiles
 	for (let i = 0; i < this.state.numTiles; i++) {
@@ -245,7 +251,7 @@ class PathingGrid extends React.Component {
 	    <button onClick={() => {this.path();}}>path</button>
 	    <button onClick={() => {console.log(this.state.tiles);}}> foo </button>
 	    <button onClick={() => {this.clear()}}> clear </button>
-	    <Box onMouseDown={()=>{this.setState({mouseDown: true})}} onMouseUp={()=>{this.setState({mouseDown: false})}} sx={{ display: 'grid', justifyContent: 'center', gridGap: "0px", gridTemplateColumns: 'repeat(' + this.state.width + ', 3vh)', gridTemplateRows: 'repeat(' + this.state.height + ', 3vh)' }}>
+	    <Box onMouseDown={()=>{this.setState({mouseDown: true})}}  onMouseUp={()=>{this.setState({mouseDown: false})}} sx={{ display: 'grid', justifyContent: 'center', gridGap: "0px", gridTemplateColumns: 'repeat(' + this.state.width + ', 3vh)', gridTemplateRows: 'repeat(' + this.state.height + ', 3vh)' }}>
 	    {this.state.tiles.map((element, index, array) => {return <Tile click={()=>{this.clickTile(index)}} drag={()=>{if (this.state.mouseDown === true) this.clickTile(index)}} key={this.state.tiles.at(index).id} type={this.state.tiles.at(index).type} />})}
 	    </Box>
 	    </div>
