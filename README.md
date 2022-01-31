@@ -14,3 +14,7 @@ to run locally:
 1. clone repo
 2. `npm install`
 3. `npm start`
+
+# TODO
+- add maze generator
+- add more algorithms (currently dijkstra's is implemented)
