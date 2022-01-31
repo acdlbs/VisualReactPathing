@@ -4,5 +4,5 @@ I created this repo gain a better understanding of react, as well as the most co
 # To run
 to run locally:
 1. clone repo
-2. `npm install'
-3. 'npm start'
+2. `npm install`
+3. `npm start`
