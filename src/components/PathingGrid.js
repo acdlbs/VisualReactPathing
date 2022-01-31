@@ -1,7 +1,9 @@
 import * as React from "react";
 import Tile from "./Tile.js"
 import Box from "@mui/material/Box";
-
+import Button from '@mui/material/Button';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 class PathingGrid extends React.Component {
 
@@ -9,13 +11,14 @@ class PathingGrid extends React.Component {
     constructor(props) {
 	super(props);
 	this.state = {
-	    numTiles: 100,
-	    width: 10,
-	    height: 10,
+	    numTiles: 1500,
+	    width: 50,
+	    height: 30,
 	    tiles: [],
 	    startToggle: false,
 	    endToggle: false,
-	    mouseDown: false
+	    mouseDown: false,
+	    toggles: null
 	};
     }
 
@@ -134,6 +137,9 @@ class PathingGrid extends React.Component {
 	if (this.dijkstraInterval != null) this.dijkstraInterval = null;
 	let a = this.state.tiles.slice();
 	//set weights of all neighboring tiles
+	console.log(this.state.numTiles);
+	console.log(this.state.width);
+	console.log(this.state.height);
 	for (let i = 0; i < this.state.numTiles; i++) {
 	    let w = (new Array(this.state.numTiles).fill(0));
 	    if (i+1 in w) {
@@ -156,6 +162,11 @@ class PathingGrid extends React.Component {
     }
 
     componentDidMount() {
+	if (window.innerWidth > 1447) {
+	    this.setState({numTiles: 1500, width: 50, height: 30}, this.clear);
+	} else if (window.innerWidth < window.innerHeight) {
+	    this.setState({numTiles: 250, width: 10, height: 25}, this.clear);
+	}
 	this.clear();
     }
 
@@ -184,10 +195,18 @@ class PathingGrid extends React.Component {
     }
 
     toggleStart() {
-	this.setState({startToggle: !this.state.startToggle});
+	if (this.state.startToggle === true) {
+	    this.setState({startToggle: false, toggles: null});
+	} else {
+	    this.setState({startToggle: true});
+	}
     }
     toggleEnd() {
-	this.setState({endToggle: !this.state.endToggle});
+	if (this.state.endToggle === true) {
+	    this.setState({endToggle: false, toggles: null});
+	} else {
+	    this.setState({endToggle: true});
+	}
     }
 
     clickTile(index) {
@@ -243,15 +262,29 @@ class PathingGrid extends React.Component {
 	}
     }
 
+    buttonToggles(event, newAlignment){
+	this.setState({toggles: newAlignment});
+    };
+
     render() {
 	return (
 	    <div>
-	    <button onClick={() => {this.toggleStart()}}>startFlag</button>
-	    <button onClick={() => {this.toggleEnd();}}>endFlag</button>
-	    <button onClick={() => {this.path();}}>path</button>
-	    <button onClick={() => {console.log(this.state.tiles);}}> foo </button>
-	    <button onClick={() => {this.clear()}}> clear </button>
-	    <Box onMouseDown={()=>{this.setState({mouseDown: true})}}  onMouseUp={()=>{this.setState({mouseDown: false})}} sx={{ display: 'grid', justifyContent: 'center', gridGap: "0px", gridTemplateColumns: 'repeat(' + this.state.width + ', 3vh)', gridTemplateRows: 'repeat(' + this.state.height + ', 3vh)' }}>
+	    <Box sx={{ width: '100vw', height: '7vh', backgroundColor: '#47c6ab91', display: 'inline-flex', flexDirection: 'row', alignContent: 'center',	justifyContent: 'center'}}>
+	    <ToggleButtonGroup
+	    color="primary"
+	    value={this.state.toggles}
+	    exclusive
+	    onChange={(event, val)=>{this.buttonToggles(event, val)}}
+	    >
+	    <ToggleButton value="start" color="success" onClick={() => {this.toggleStart()}}>startFlag</ToggleButton>
+	    <ToggleButton value="end" color="error" onClick={() => {this.toggleEnd();}}>endFlag</ToggleButton>
+	    </ToggleButtonGroup>
+	    
+	    <Button sx={{color: "#000000ab"}} onClick={() => {this.path();}}>path</Button>
+	    <Button sx={{color: "#000000ab"}} onClick={() => {this.clear()}}> clear </Button>
+	    </Box>
+
+	    <Box onMouseDown={()=>{this.setState({mouseDown: true})}}  onMouseUp={()=>{this.setState({mouseDown: false})}} sx={{ paddingTop: '1vh', display: 'grid', justifyContent: 'center', gridGap: "0px", gridTemplateColumns: 'repeat(' + this.state.width + ', 3vh)', gridTemplateRows: 'repeat(' + this.state.height + ', 3vh)' }}>
 	    {this.state.tiles.map((element, index, array) => {return <Tile click={()=>{this.clickTile(index)}} drag={()=>{if (this.state.mouseDown === true) this.clickTile(index)}} key={this.state.tiles.at(index).id} type={this.state.tiles.at(index).type} />})}
 	    </Box>
 	    </div>
